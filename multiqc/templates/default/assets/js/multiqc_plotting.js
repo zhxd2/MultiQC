@@ -234,11 +234,20 @@ function plot_xy_line_graph(target, ds){
   if(ds === undefined){ ds = 0; }
   
   if(config['tt_label'] === undefined){ config['tt_label'] = '{point.x}: {point.y:.2f}'; }
-  if(config['click_func'] === undefined){ config['click_func'] = function(){}; }
-  else {
-    config['click_func'] = eval("("+config['click_func']+")");
-    if(config['cursor'] === undefined){ config['cursor'] = 'pointer'; }
+  if(config['click_func'] === undefined){
+    config['click_func'] = function(e){
+      wrp = $('#'+e.point.series.chart.renderTo.id+'_clickWrapper');
+      wrp.html('<span class="click_s_name">'+e.point.series.name+':</span> <div class="btn-group"><button class="btn btn-default btn-sm">Highlight</button><button class="btn btn-default btn-sm">Hide others</button></div>');
+      $.each(e.point.series.chart.series, function(i, v){
+        if(v.name != e.point.series.name){
+          v.update({lineWidth: 2});
+        }
+      });
+      e.point.series.update({lineWidth: 8});
+    };
   }
+  else { config['click_func'] = eval("("+config['click_func']+")"); }
+  if(config['cursor'] === undefined){ config['cursor'] = 'pointer'; }
   if (config['xDecimals'] === undefined){ config['xDecimals'] = true; }
   if (config['yDecimals'] === undefined){ config['yDecimals'] = true; }
   if (config['pointFormat'] === undefined){

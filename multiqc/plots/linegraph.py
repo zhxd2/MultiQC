@@ -119,7 +119,7 @@ def highcharts_linegraph (plotdata, pconfig={}):
     
     # Buttons to cycle through different datasets
     if len(plotdata) > 1:
-        html += '<div class="btn-group hc_switch_group">\n'
+        html += '<div class="btn-group hc_switch_group pull-left">\n'
         for k, p in enumerate(plotdata):
             active = 'active' if k == 0 else ''
             try:
@@ -136,6 +136,10 @@ def highcharts_linegraph (plotdata, pconfig={}):
                 ymax = ''
             html += '<button class="btn btn-default btn-sm {a}" data-action="set_data" {y} {ym} data-newdata="{k}" data-target="{id}">{n}</button>\n'.format(a=active, id=pconfig['id'], n=name, y=ylab, ym=ymax, k=k)
         html += '</div>\n\n'
+    
+    # Click event placeholder
+    html += '<div class="mqc-plot-click-wrapper pull-left" id="{}_clickWrapper">Click a point to see extra stuff here.</div>'.format(pconfig['id'])
+    html += '<div class="clearfix"></div>'
     
     # The plot div
     html += '<div class="hc-plot-wrapper"><div id="{id}" class="hc-plot not_rendered hc-line-plot"><small>loading..</small></div></div></div> \n'.format(id=pconfig['id'])
