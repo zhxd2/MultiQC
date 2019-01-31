@@ -149,9 +149,10 @@ class MultiqcModule(BaseMultiqcModule):
         cmd = parsed_json['command'].split()
         for i,v in enumerate(cmd):
             if v == '-i':
-                s_name = self.clean_s_name(cmd[i+1], f['root'])
+                s_name = (self.clean_s_name(cmd[i+1], f['root'])).split('_')[0]
         if s_name == 'fastp':
             log.warn('Could not parse sample name from fastp command: {}'.format(f['fn']))
+
 
         self.add_data_source(f, s_name)
         self.fastp_data[s_name] = {}
@@ -187,6 +188,9 @@ class MultiqcModule(BaseMultiqcModule):
         # Parse data required to calculate Pct reads surviving
         try:
             self.fastp_data[s_name]['before_filtering_total_reads'] = float(parsed_json['summary']['before_filtering']['total_reads'])
+            self.fastp_data[s_name]['before_filtering_total_bases'] = float(parsed_json['summary']['before_filtering']['total_bases'])
+            self.fastp_data[s_name]['after_filtering_total_reads'] = float(parsed_json['summary']['after_filtering']['total_reads'])
+            self.fastp_data[s_name]['after_filtering_total_reads'] = float(parsed_json['summary']['after_filtering']['total_bases'])
         except KeyError:
             log.debug("Could not find pre-filtering # reads: '{}'".format(f['fn']))
 
@@ -277,6 +281,39 @@ class MultiqcModule(BaseMultiqcModule):
         General Statistics table at the top of the report """
 
         headers = OrderedDict()
+        headers['before_filtering_total_reads'] = {
+            'title': 'Total raw reads',
+            'description': 'Total reads before filtering',
+            'max': None,
+            'min': None,
+            'scale': 'GnBu',
+            'format': '{:.0f}'
+        }
+        headers['after_filtering_total_reads'] = {
+            'title': 'Total clean reads',
+            'description': 'Total reads after filtering',
+            'max': None,
+            'min': None,
+            'scale': 'RdYlGn-rev',
+            'format': '{:.0f}'
+        }
+        headers['before_filtering_total_bases'] = {
+            'title': 'Total raw bases',
+            'description': 'Total bases before filtering',
+            'max': None,
+            'min': None,
+            'scale': 'GnBu',
+            'format': '{:.0f}'
+        }
+        headers['after_filtering_total_bases'] = {
+            'title': 'Total clean bases',
+            'description': 'Total bases after filtering',
+            'max': None,
+            'min': None,
+            'scale': 'RdYlGn-rev',
+            'format': '{:.0f}'
+        }
+
         headers['pct_duplication'] = {
             'title': '% Duplication',
             'description': 'Duplication rate in filtered reads',
@@ -285,24 +322,24 @@ class MultiqcModule(BaseMultiqcModule):
             'suffix': '%',
             'scale': 'RdYlGn-rev'
         }
-        headers['after_filtering_q30_rate'] = {
-            'title': '{} Q30 reads'.format(config.read_count_prefix),
-            'description': 'Reads > Q30 after filtering ({})'.format(config.read_count_desc),
-            'min': 0,
-            'modify': lambda x: x * config.read_count_multiplier,
-            'scale': 'GnBu',
-            'shared_key': 'read_count',
-            'hidden': True
-        }
-        headers['after_filtering_q30_bases'] = {
-            'title': '{} Q30 bases'.format(config.base_count_prefix),
-            'description': 'Bases > Q30 after filtering ({})'.format(config.base_count_desc),
-            'min': 0,
-            'modify': lambda x: x * config.base_count_multiplier,
-            'scale': 'GnBu',
-            'shared_key': 'base_count',
-            'hidden': True
-        }
+#        headers['after_filtering_q30_rate'] = {
+#            'title': '{} Q30 reads'.format(config.read_count_prefix),
+#            'description': 'Reads > Q30 after filtering ({})'.format(config.read_count_desc),
+#            'min': 0,
+#            'modify': lambda x: x * config.read_count_multiplier,
+#            'scale': 'GnBu',
+#            'shared_key': 'read_count',
+#            'hidden': True
+#        }
+#        headers['after_filtering_q30_bases'] = {
+#            'title': '{} Q30 bases'.format(config.base_count_prefix),
+#            'description': 'Bases > Q30 after filtering ({})'.format(config.base_count_desc),
+#            'min': 0,
+#            'modify': lambda x: x * config.base_count_multiplier,
+#            'scale': 'GnBu',
+#            'shared_key': 'base_count',
+#            'hidden': True
+#        }
         headers['after_filtering_gc_content'] = {
             'title': 'GC content',
             'description': 'GC content after filtering',
